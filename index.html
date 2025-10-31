@@ -1,23 +1,167 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>倉鼠的一生</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>倉鼠的一生</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background: #ffe6b3;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      color: #7a4b2e;
+      margin-top: 30px;
+    }
+    .game-box {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 350px;
+      margin: 30px auto;
+      padding: 20px;
+      position: relative;
+    }
+    .hamster {
+      width: 100px;
+      height: 100px;
+      background-color: #d9a96e;
+      border-radius: 50%;
+      margin: 20px auto;
+      position: relative;
+    }
+    .hamster::before {
+      content: '';
+      width: 30px;
+      height: 30px;
+      background-color: #d9a96e;
+      border-radius: 50%;
+      position: absolute;
+      top: 10px;
+      left: 20px;
+    }
+    .hamster::after {
+      content: '';
+      width: 30px;
+      height: 30px;
+      background-color: #d9a96e;
+      border-radius: 50%;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+    }
+    #hunger-bar {
+      width: 80%;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 10px auto;
+      overflow: hidden;
+    }
+    #hunger-fill {
+      height: 100%;
+      width: 100%;
+      background: #76c893;
+      transition: width 0.5s;
+    }
+    button {
+      background-color: #ffb347;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      margin: 10px;
+    }
+    button:hover {
+      background-color: #ffa031;
+    }
+    #message {
+      font-size: 16px;
+      color: #444;
+      min-height: 24px;
+    }
+    #game-over {
+      color: red;
+      font-size: 20px;
+      display: none;
+      margin-top: 15px;
+    }
+  </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>倉鼠的一生</h1>
-        <div class="hamster-container">
-            <img id="hamster" src="hamster.png" alt="倉鼠">
-        </div>
-        <p>餵牠吃東西!</p>
-        <button id="feedButton">餵食</button>
-        <p>倉鼠的飽食度: <span id="hungerLevel">100</span></p>
-        <p id="gameOverMessage" style="display:none;">遊戲結束! 倉鼠餓死了!</p>
-    </div>
+  <h1>🐹 倉鼠的一生 🐹</h1>
+  <div class="game-box">
+    <div class="hamster" id="hamster"></div>
+    <div id="hunger-bar"><div id="hunger-fill"></div></div>
+    <p id="message">倉鼠感覺有點餓～</p>
+    <button id="feedBtn">🍎 餵食</button>
+    <button id="playBtn">🎾 玩耍</button>
+    <p id="game-over">💀 倉鼠餓死了... 遊戲結束 💀</p>
+  </div>
 
-    <script src="script.js"></script>
+  <script>
+    let hunger = 100;
+    let hamster = document.getElementById("hamster");
+    let hungerFill = document.getElementById("hunger-fill");
+    let message = document.getElementById("message");
+    let feedBtn = document.getElementById("feedBtn");
+    let playBtn = document.getElementById("playBtn");
+    let gameOverText = document.getElementById("game-over");
+    let alive = true;
+
+    // 飢餓值逐漸下降
+    const hungerDrop = setInterval(() => {
+      if (!alive) return;
+      hunger -= 2;
+      updateHunger();
+    }, 1000);
+
+    function updateHunger() {
+      hunger = Math.max(0, Math.min(100, hunger));
+      hungerFill.style.width = hunger + "%";
+
+      if (hunger > 70) message.textContent = "倉鼠很開心！";
+      else if (hunger > 40) message.textContent = "倉鼠有點餓...";
+      else if (hunger > 10) message.textContent = "倉鼠快餓扁了 😢";
+      else if (hunger > 0) message.textContent = "倉鼠快不行了！！";
+      else endGame();
+    }
+
+    function feedHamster() {
+      if (!alive) return;
+      hunger += 20;
+      hamster.style.transform = "scale(1.2)";
+      message.textContent = "倉鼠吃飽了！🍎";
+      updateHunger();
+      setTimeout(() => hamster.style.transform = "scale(1)", 300);
+    }
+
+    function playHamster() {
+      if (!alive) return;
+      hunger -= 5;
+      message.textContent = "倉鼠玩得很開心！🎾";
+      hamster.style.transform = "scale(1.2)";
+      updateHunger();
+      setTimeout(() => hamster.style.transform = "scale(1)", 300);
+    }
+
+    function endGame() {
+      alive = false;
+      gameOverText.style.display = "block";
+      message.textContent = "";
+      feedBtn.disabled = true;
+      playBtn.disabled = true;
+      hamster.style.backgroundColor = "#a7a7a7"; // 灰色倉鼠
+      clearInterval(hungerDrop);
+    }
+
+    feedBtn.addEventListener("click", feedHamster);
+    playBtn.addEventListener("click", playHamster);
+  </script>
 </body>
 </html>
