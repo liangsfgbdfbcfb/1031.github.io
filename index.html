@@ -70,7 +70,7 @@
     #poop-fill {
       background: #c24e1d;
     }
-    button {
+    button, select {
       background-color: #ffb347;
       border: none;
       color: white;
@@ -82,6 +82,12 @@
     }
     button:hover {
       background-color: #ffa031;
+    }
+    select {
+      background-color: #ffe6b3;
+      color: #7a4b2e;
+      font-size: 16px;
+      cursor: pointer;
     }
     #message {
       font-size: 16px;
@@ -102,16 +108,27 @@
     <div class="hamster" id="hamster"></div>
     <div id="hunger-bar"><div id="hunger-fill"></div></div>
     <div id="poop-bar"><div id="poop-fill"></div></div>
+
     <p id="message">倉鼠感覺有點餓～</p>
-    <button id="feedBtn">🍎 餵食</button>
+
+    <!-- 食物選擇 -->
+    <select id="foodSelect">
+      <option value="apple">🍎 蘋果 (+25)</option>
+      <option value="seed">🌻 種子 (+15)</option>
+      <option value="cookie">🍪 餅乾 (+10, 但容易肚子痛)</option>
+      <option value="carrot">🥕 胡蘿蔔 (+20)</option>
+    </select>
+
+    <button id="feedBtn">🍽 餵食</button>
     <button id="playBtn">🎾 玩耍</button>
     <button id="poopBtn">🚽 上廁所</button>
+
     <p id="game-over">💀 倉鼠餓死或不小心大便太久，遊戲結束 💀</p>
   </div>
 
   <script>
     let hunger = 100;
-    let poop = 0; // 0: 不需要，1: 需要上廁所
+    let poop = 0;
     let hamster = document.getElementById("hamster");
     let hungerFill = document.getElementById("hunger-fill");
     let poopFill = document.getElementById("poop-fill");
@@ -119,14 +136,14 @@
     let feedBtn = document.getElementById("feedBtn");
     let playBtn = document.getElementById("playBtn");
     let poopBtn = document.getElementById("poopBtn");
+    let foodSelect = document.getElementById("foodSelect");
     let gameOverText = document.getElementById("game-over");
     let alive = true;
 
-    // 飢餓值和大便需求逐漸增加
     const hungerDrop = setInterval(() => {
       if (!alive) return;
       hunger -= 1;
-      poop += 1; // 每秒大便需求增加
+      poop += 1;
       updateHunger();
       updatePoop();
     }, 1000);
@@ -143,25 +160,51 @@
     }
 
     function updatePoop() {
-      poop = Math.min(100, poop);  // 大便需求不會超過100
+      poop = Math.min(100, poop);
       poopFill.style.width = poop + "%";
 
       if (poop > 70) message.textContent += " 倉鼠需要上廁所了！";
-      else if (poop >= 100) endGame(); // 如果大便需求過高，遊戲結束
+      else if (poop >= 100) endGame();
     }
 
     function feedHamster() {
       if (!alive) return;
-      hunger += 25;  // 餵食後，倉鼠增加25點飢餓值
-      hamster.style.transform = "scale(1.2)";
-      message.textContent = "倉鼠吃飽了！🍎";
+      const food = foodSelect.value;
+      let restore = 0;
+      let extraMsg = "";
+
+      switch (food) {
+        case "apple":
+          restore = 25;
+          extraMsg = "🍎 倉鼠開心地啃著蘋果！";
+          break;
+        case "seed":
+          restore = 15;
+          extraMsg = "🌻 倉鼠津津有味地吃著種子～";
+          break;
+        case "cookie":
+          restore = 10;
+          extraMsg = "🍪 倉鼠吃了餅乾，有點肚子痛 😣";
+          poop += 10; // 吃餅乾容易肚子痛
+          break;
+        case "carrot":
+          restore = 20;
+          extraMsg = "🥕 倉鼠啃著胡蘿蔔，好可愛～";
+          break;
+      }
+
+      hunger += restore;
       updateHunger();
+      updatePoop();
+
+      hamster.style.transform = "scale(1.2)";
+      message.textContent = extraMsg;
       setTimeout(() => hamster.style.transform = "scale(1)", 300);
     }
 
     function playHamster() {
       if (!alive) return;
-      hunger -= 5;  // 玩耍消耗5點飢餓值，並增加快樂
+      hunger -= 5;
       message.textContent = "倉鼠玩得很開心！🎾";
       hamster.style.transform = "scale(1.2)";
       updateHunger();
@@ -169,8 +212,8 @@
     }
 
     function poopHamster() {
-      if (!alive || poop < 70) return;  // 必須有足夠的大便需求
-      poop = 0;  // 解決大便問題
+      if (!alive || poop < 70) return;
+      poop = 0;
       poopFill.style.width = poop + "%";
       message.textContent = "倉鼠上廁所了！🚽";
     }
@@ -182,7 +225,8 @@
       feedBtn.disabled = true;
       playBtn.disabled = true;
       poopBtn.disabled = true;
-      hamster.style.backgroundColor = "#a7a7a7"; // 灰色倉鼠
+      foodSelect.disabled = true;
+      hamster.style.backgroundColor = "#a7a7a7";
       clearInterval(hungerDrop);
     }
 
