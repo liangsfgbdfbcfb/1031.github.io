@@ -30,6 +30,14 @@ button {
     cursor: pointer;
     font-size: 16px;
 }
+#hamster-image {
+    width: 120px;  /* 圖片的大小 */
+    height: 120px;
+    border-radius: 50%; /* 圓形圖片 */
+    margin: 10px auto;
+    display: block; /* 使圖片顯示為區塊元素，居中 */
+  }
+  
 
 button:hover {
     background-color: #45a049;
